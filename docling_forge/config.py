@@ -1,4 +1,4 @@
-"""Configuration file handling for docling-container."""
+"""Configuration file handling for docling-forge."""
 
 import yaml
 from pathlib import Path
@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 
 
 class Config:
-    """Configuration manager for docling-container."""
+    """Configuration manager for docling-forge."""
 
     DEFAULT_CONFIG = {
         'output_format': 'markdown',

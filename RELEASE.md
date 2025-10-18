@@ -1,6 +1,6 @@
 # Release Guide
 
-This document describes the release process for docling-container.
+This document describes the release process for docling-forge.
 
 ## Overview
 
@@ -123,10 +123,10 @@ The `scripts/release.sh` script automates the entire release process:
    - Sets up Docker Buildx
    - Builds for linux/amd64 and linux/arm64
    - Creates multiple tags:
-     - `ghcr.io/rennochj/docling-container:0.1.0` (specific)
-     - `ghcr.io/rennochj/docling-container:0.1` (minor)
-     - `ghcr.io/rennochj/docling-container:0` (major)
-     - `ghcr.io/rennochj/docling-container:latest`
+     - `ghcr.io/rennochj/docling-forge:0.1.0` (specific)
+     - `ghcr.io/rennochj/docling-forge:0.1` (minor)
+     - `ghcr.io/rennochj/docling-forge:0` (major)
+     - `ghcr.io/rennochj/docling-forge:latest`
 
 6. ✅ **Push to GHCR:**
    - Authenticates with GitHub Container Registry
@@ -243,16 +243,16 @@ After a successful release:
 1. **Verify the release:**
    ```bash
    # Check GitHub release page
-   open https://github.com/rennochj/docling-container/releases
+   open https://github.com/rennochj/docling-forge/releases
 
    # Test pulling the image
-   docker pull ghcr.io/rennochj/docling-container:latest
-   docker pull ghcr.io/rennochj/docling-container:0.1.0
+   docker pull ghcr.io/rennochj/docling-forge:latest
+   docker pull ghcr.io/rennochj/docling-forge:0.1.0
    ```
 
 2. **Test the image:**
    ```bash
-   docker run --rm ghcr.io/rennochj/docling-container:latest --version
+   docker run --rm ghcr.io/rennochj/docling-forge:latest --version
    ```
 
 3. **Announce the release:**
@@ -327,5 +327,5 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 For release-related issues:
 - Check this guide first
 - Review [CHANGELOG.md](CHANGELOG.md)
-- Check [GitHub Issues](https://github.com/rennochj/docling-container/issues)
+- Check [GitHub Issues](https://github.com/rennochj/docling-forge/issues)
 - Ask in GitHub Discussions

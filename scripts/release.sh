@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Automated release script for docling-container
+# Automated release script for docling-forge
 # Handles versioning, building, pushing, and GitHub release creation
 
 set -e
@@ -12,7 +12,7 @@ BLUE=$'\033[0;34m'
 NC=$'\033[0m' # No Color
 
 # Configuration
-GITHUB_REPO="rennochj/docling-container"
+GITHUB_REPO="rennochj/docling-forge"
 IMAGE_NAME="ghcr.io/${GITHUB_REPO}"
 
 # Helper functions

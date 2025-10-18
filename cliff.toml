@@ -58,7 +58,7 @@ split_commits = false
 # Regex for preprocessing commit messages
 commit_preprocessors = [
     # Link to GitHub issues
-    { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/rennochj/docling-container/issues/${2}))" },
+    { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/rennochj/docling-forge/issues/${2}))" },
     # Remove Claude Code attribution from commit messages
     { pattern = '🤖 Generated with.*', replace = "" },
     { pattern = 'Co-Authored-By: Claude.*', replace = "" },
@@ -103,4 +103,4 @@ sort_commits = "oldest"
 
 [remote.github]
 owner = "rennochj"
-repo = "docling-container"
+repo = "docling-forge"

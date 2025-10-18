@@ -1,4 +1,4 @@
-"""Logging configuration for docling-container."""
+"""Logging configuration for docling-forge."""
 
 import logging
 import sys

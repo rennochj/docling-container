@@ -534,7 +534,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 
 # Run the CLI locally
-uv run python -m docling_container.main --help
+uv run python -m docling_forge.main --help
 
 # Run tests
 uv run pytest

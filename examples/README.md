@@ -23,19 +23,19 @@ A sample HTML document demonstrating:
 ### Convert Markdown to HTML
 
 ```bash
-uv run python -m docling_container.main convert examples/sample.md output/ -f html
+uv run python -m docling_forge.main convert examples/sample.md output/ -f html
 ```
 
 ### Convert HTML to Markdown
 
 ```bash
-uv run python -m docling_container.main convert examples/sample.html output/ -f markdown
+uv run python -m docling_forge.main convert examples/sample.html output/ -f markdown
 ```
 
 ### Batch Convert All Examples
 
 ```bash
-uv run python -m docling_container.main convert examples/ output/ --batch
+uv run python -m docling_forge.main convert examples/ output/ --batch
 ```
 
 ## Adding Your Own Examples

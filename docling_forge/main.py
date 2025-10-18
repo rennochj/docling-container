@@ -1,4 +1,4 @@
-"""Main CLI interface for docling-container."""
+"""Main CLI interface for docling-forge."""
 
 import click
 import logging
@@ -12,7 +12,7 @@ from .config import Config
 
 # Get version from package metadata
 try:
-    __version__ = version("docling-container")
+    __version__ = version("docling-forge")
 except PackageNotFoundError:
     __version__ = "unknown"
 
@@ -247,7 +247,7 @@ def convert(
         _suppress_rapidocr_logging()
 
     # Log version information
-    logger.info(f"docling-container version {__version__}")
+    logger.info(f"docling-forge version {__version__}")
 
     try:
         # Load configuration if provided

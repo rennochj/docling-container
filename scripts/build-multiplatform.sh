@@ -5,7 +5,7 @@ set -e
 
 # Configuration
 BUILDER_NAME="docling-multiplatform"
-IMAGE_NAME="ghcr.io/rennochj/docling-container"
+IMAGE_NAME="ghcr.io/rennochj/docling-forge"
 PLATFORMS="linux/amd64,linux/arm64"
 
 # Read version from VERSION file
