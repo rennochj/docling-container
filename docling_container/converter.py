@@ -320,7 +320,8 @@ class DocumentConverter:
         input_dir: Path,
         output_dir: Path,
         recursive: bool = False,
-        fail_fast: bool = False
+        fail_fast: bool = False,
+        patterns: Optional[List[str]] = None
     ) -> List[Path]:
         """Convert multiple files from a directory.
 
@@ -329,6 +330,7 @@ class DocumentConverter:
             output_dir: Directory for output files
             recursive: Whether to process subdirectories
             fail_fast: Whether to stop on first error
+            patterns: Optional list of glob patterns to filter files (e.g., ["*.pdf", "*.docx"])
 
         Returns:
             List of successfully converted output file paths
@@ -339,14 +341,29 @@ class DocumentConverter:
         self.logger.info(f"Starting batch conversion from {input_dir}")
         self.logger.info(f"Output directory: {output_dir}")
         self.logger.info(f"Recursive: {recursive}, Fail-fast: {fail_fast}")
+        if patterns:
+            self.logger.info(f"File patterns: {', '.join(patterns)}")
 
         # Find all supported files
         supported_files = []
-        pattern = "**/*" if recursive else "*"
 
-        for file_path in input_dir.glob(pattern):
-            if file_path.is_file() and self._detect_format(file_path):
-                supported_files.append(file_path)
+        if patterns:
+            # Use specified patterns
+            for pattern in patterns:
+                # Add ** prefix for recursive patterns if recursive is enabled
+                if recursive and not pattern.startswith('**'):
+                    pattern = f"**/{pattern}"
+
+                for file_path in input_dir.glob(pattern):
+                    if file_path.is_file() and self._detect_format(file_path):
+                        if file_path not in supported_files:  # Avoid duplicates
+                            supported_files.append(file_path)
+        else:
+            # Use default pattern (all files)
+            pattern = "**/*" if recursive else "*"
+            for file_path in input_dir.glob(pattern):
+                if file_path.is_file() and self._detect_format(file_path):
+                    supported_files.append(file_path)
 
         self.logger.info(f"Found {len(supported_files)} supported files")
 

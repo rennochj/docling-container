@@ -11,10 +11,10 @@ from .logger import setup_logging
 from .config import Config
 
 
-# Supported formats as per PRD
+# Supported formats (must match converter.py EXTENSION_TO_FORMAT)
 INPUT_FORMATS = [
-    "html", "md", "markdown", "docx", "pptx", "xlsx",
-    "pdf", "asciidoc", "adoc", "csv", "png", "jpg",
+    "html", "md", "markdown", "docx", "pptx",
+    "pdf", "asciidoc", "adoc", "png", "jpg",
     "jpeg", "tiff", "bmp", "webp"
 ]
 
@@ -42,7 +42,7 @@ def is_url(string: str) -> bool:
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@click.version_option(version="0.1.0")
+@click.version_option(version="0.3.1")
 def cli(ctx):
     """Docling Container - Document conversion tool.
 
@@ -114,6 +114,11 @@ def cli(ctx):
     default=False,
     help='Include full page images in extraction (usually not needed).'
 )
+@click.option(
+    '--pattern',
+    multiple=True,
+    help='Glob pattern(s) to filter files in batch mode (e.g., "*.pdf", "report_*.docx"). Can be specified multiple times.'
+)
 def convert(
     input_path: str,
     output_dir: Path,
@@ -127,7 +132,8 @@ def convert(
     fail_fast: bool,
     export_images: bool,
     images_scale: float,
-    export_page_images: bool
+    export_page_images: bool,
+    pattern: tuple
 ):
     """Convert document(s) from INPUT_PATH to OUTPUT_DIR.
 
@@ -153,6 +159,12 @@ def convert(
 
         # Recursive processing with custom log level
         docling-convert -r --log-level DEBUG
+
+        # Batch convert only PDFs
+        docling-convert --batch --pattern "*.pdf"
+
+        # Batch convert with multiple patterns
+        docling-convert --batch --pattern "*.pdf" --pattern "*.docx"
     """
     # Setup logging
     logger = setup_logging(log_level, log_file)
@@ -206,11 +218,14 @@ def convert(
                     "Use --batch flag to process directories."
                 )
             logger.info(f"Batch converting files from: {path_obj}")
+            # Convert tuple to list for patterns
+            patterns = list(pattern) if pattern else None
             converter.convert_batch(
                 path_obj,
                 output_dir,
                 recursive=recursive,
-                fail_fast=fail_fast
+                fail_fast=fail_fast,
+                patterns=patterns
             )
         else:
             raise click.ClickException(f"Invalid input path: {path_obj}")

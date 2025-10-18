@@ -8,22 +8,26 @@ A Docker container for [Docling](https://docling-project.github.io/docling/), a 
 
 ## Features
 
-- **Multiple Input Formats**: PDF, DOCX, PPTX, XLSX, HTML, Markdown, ASCIIDOC, CSV, and images (PNG, JPEG, TIFF, BMP, WEBP)
+- **Multiple Input Formats**: PDF, DOCX, PPTX, HTML, Markdown, ASCIIDOC, and images (PNG, JPEG, TIFF, BMP, WEBP)
 - **Multiple Output Formats**: Markdown, HTML, JSON, Text, Doctags
 - **URL Support**: Convert documents directly from URLs (e.g., arxiv.org papers, online PDFs)
-- **Image Extraction**: Extract and save images from documents with configurable resolution
+- **Image Extraction**: Extract and save images (figures, tables) from documents with configurable resolution
+- **OCR Support**: Built-in OCR for extracting text from images and scanned PDFs
+- **Table Detection**: Advanced table structure recognition and extraction
 - **Batch Processing**: Convert entire directories of documents
+- **Pattern Filtering**: Use glob patterns to selectively process files (e.g., only PDFs)
 - **Recursive Processing**: Process nested directory structures
 - **Comprehensive Logging**: Detailed logs with conversion statistics
 - **Performance Optimized**: Multi-stage Docker build for minimal image size
 - **Error Handling**: Graceful error handling with meaningful messages
+- **Flexible Configuration**: YAML config file support for default settings
 
 ## Supported Formats
 
 ### Input Formats
-- **Documents**: PDF, DOCX, PPTX, XLSX, HTML, Markdown, ASCIIDOC, CSV
+- **Documents**: PDF, DOCX, PPTX, HTML, Markdown, ASCIIDOC
 - **Images**: PNG, JPEG, TIFF, BMP, WEBP
-- **URLs**: Any publicly accessible document URL
+- **URLs**: Any publicly accessible document URL (HTTP/HTTPS)
 
 ### Output Formats
 - Markdown (`.md`)
@@ -31,6 +35,14 @@ A Docker container for [Docling](https://docling-project.github.io/docling/), a 
 - JSON (`.json`)
 - Plain Text (`.txt`)
 - Doctags (`.doctags`)
+
+## Technical Details
+
+- **Base Image**: Python 3.13 (slim)
+- **Multi-stage Build**: Optimized for minimal image size
+- **Package Manager**: UV (fast Python package installer)
+- **Docling Version**: 2.0.0+
+- **Architecture**: Supports amd64 and arm64
 
 ## Installation
 
@@ -47,7 +59,7 @@ Pull the latest image from GitHub Container Registry:
 docker pull ghcr.io/rennochj/docling-container:latest
 
 # Or pull a specific version
-docker pull ghcr.io/rennochj/docling-container:0.1.0
+docker pull ghcr.io/rennochj/docling-container:0.3.1
 ```
 
 ### Building from Source
@@ -115,6 +127,12 @@ docling convert https://arxiv.org/pdf/2408.09869 /output
 # Batch convert with image extraction
 docling convert --batch --export-images
 
+# Batch convert only PDFs
+docling convert --batch --pattern "*.pdf"
+
+# Batch convert multiple file types
+docling convert --batch --pattern "*.pdf" --pattern "*.docx"
+
 # See all options
 docling convert --help
 ```
@@ -167,7 +185,7 @@ docker run -v $(pwd)/output:/output \
 
 ### Image Extraction
 
-Extract images from documents while converting:
+Extract images from documents while converting. By default, only figures and tables are extracted:
 
 ```bash
 # Extract figures and tables (recommended)
@@ -208,6 +226,22 @@ docker run -v /path/to/docs:/input -v /path/to/output:/output \
   docling-container convert . --batch
 ```
 
+Filter files using glob patterns:
+
+```bash
+# Convert only PDF files
+docker run -v /path/to/docs:/input -v /path/to/output:/output \
+  docling-container convert --batch --pattern "*.pdf"
+
+# Convert multiple file types
+docker run -v /path/to/docs:/input -v /path/to/output:/output \
+  docling-container convert --batch --pattern "*.pdf" --pattern "*.docx"
+
+# Pattern matching for specific filenames
+docker run -v /path/to/docs:/input -v /path/to/output:/output \
+  docling-container convert --batch --pattern "report_*.pdf"
+```
+
 ### Recursive Processing
 
 Process directories recursively:
@@ -215,6 +249,18 @@ Process directories recursively:
 ```bash
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
   docling-container convert -r --log-level INFO
+```
+
+Combine recursive mode with patterns:
+
+```bash
+# Convert all PDFs recursively
+docker run -v /path/to/docs:/input -v /path/to/output:/output \
+  docling-container convert -r --pattern "*.pdf"
+
+# Convert specific file types from all subdirectories
+docker run -v /path/to/docs:/input -v /path/to/output:/output \
+  docling-container convert -r --pattern "*.pdf" --pattern "*.docx" --pattern "*.pptx"
 ```
 
 ### Output Format Selection
@@ -266,6 +312,7 @@ docker run -v /path/to/data:/data \
 | `--output-format` | `-f` | `markdown` | Output format (markdown, html, json, text, doctags) |
 | `--batch` / `--no-batch` | `-b` | `True` | Enable/disable batch processing for directories |
 | `--recursive` / `--no-recursive` | `-r` | `False` | Recursively process subdirectories |
+| `--pattern` | | `None` | Glob pattern(s) to filter files (e.g., "*.pdf"). Can be specified multiple times |
 | `--log-level` | | `INFO` | Logging level (DEBUG, INFO, WARNING, ERROR) |
 | `--log-file` | | `None` | Optional log file path |
 | `--config` | | `None` | Path to configuration file |
@@ -338,7 +385,25 @@ docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
 
 **Result**: Markdown with 288 DPI images extracted
 
-### Example 7: List Supported Formats
+### Example 7: Batch Convert with File Patterns
+
+```bash
+# Convert only PDF files
+docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
+  docling-container convert --batch --pattern "*.pdf"
+
+# Convert multiple specific file types
+docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
+  docling-container convert --batch --pattern "*.pdf" --pattern "*.docx" --pattern "*.pptx"
+
+# Pattern matching with recursive processing
+docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
+  docling-container convert -r --pattern "report_*.pdf"
+```
+
+**Result**: Only files matching the specified pattern(s) are converted
+
+### Example 8: List Supported Formats
 
 ```bash
 docker run docling-container formats
@@ -488,11 +553,12 @@ docker run -v /input:/input -v /output:/output \
 ## Performance Tips
 
 1. **Batch Processing**: Use batch mode for multiple files to reuse the model loading
-2. **Memory Allocation**: Allocate sufficient memory for large documents (4GB+ recommended)
+2. **Memory Allocation**: Allocate sufficient memory for large documents (4GB+ recommended for PDFs with OCR)
 3. **Fail-Fast Mode**: Use `--fail-fast` to stop on errors and save processing time
 4. **Format Selection**: JSON output is typically faster than other formats
 5. **Image Extraction**: Only use `--export-page-images` if you specifically need full page renders
 6. **Image Resolution**: Use lower `--images-scale` values (e.g., 1.0 or 2.0) for faster processing
+7. **OCR Processing**: OCR is automatically enabled for PDFs and images - this improves accuracy but increases processing time
 
 ## Configuration
 
@@ -581,9 +647,16 @@ For issues and questions:
 
 ## Changelog
 
-### Latest Changes
-- Added URL support for converting remote documents
-- Implemented image extraction with configurable resolution
-- Added option to exclude page images (only extract figures/tables)
-- Created comprehensive Makefile for common operations
-- Enhanced CLI with new options for image handling
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
+
+### Recent Highlights
+- **Glob Pattern Filtering**: Filter files in batch mode using patterns (e.g., `--pattern "*.pdf"`)
+- **OCR Support**: Automatic text extraction from images and scanned PDFs
+- **Table Structure Detection**: Advanced table recognition and extraction
+- **URL Support**: Convert documents directly from URLs (e.g., arxiv.org papers)
+- **Image Extraction**: Extract figures and tables with configurable resolution
+- **Smart Image Handling**: Option to exclude full page renders (only extract meaningful figures/tables)
+- **GHCR Integration**: Pre-built images available on GitHub Container Registry
+- **Comprehensive Makefile**: Easy-to-use targets for common operations
+- **Shell Aliases**: Quick setup for macOS, Linux, and Windows users
+- **YAML Configuration**: Support for configuration files to set default options
