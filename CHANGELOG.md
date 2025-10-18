@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🚀 Features
+- Add configurable output subdirectory for organized file storage
+
+## [0.3.5] - 2025-10-18
+
 ### ⚡ Performance
 - Implement comprehensive performance optimizations
 
