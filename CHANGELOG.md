@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚜 Refactor
 - Make version management dynamic using importlib.metadata
 
+
+### 🧪 Testing
+- Configure pytest to filter external dependency warnings
+
+
+### 🔧 Miscellaneous
+- Bump version to 0.3.2
+
 ## [0.3.1] - 2025-10-18
 
 ### 🚀 Features
