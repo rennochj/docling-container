@@ -17,6 +17,7 @@ dev = [
 
 [project.scripts]
 docling-convert = "docling_container.main:cli"
+docling = "docling_container.main:cli"
 
 [tool.setuptools]
 packages = ["docling_container"]

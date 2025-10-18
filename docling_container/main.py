@@ -176,6 +176,9 @@ def convert(
     # Setup logging
     logger = setup_logging(log_level, log_file)
 
+    # Log version information
+    logger.info(f"docling-container version {__version__}")
+
     try:
         # Load configuration if provided
         app_config = Config(config)

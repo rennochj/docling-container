@@ -29,6 +29,7 @@ htmlcov/
 
 # Project specific
 output/
+input/
 *.log
 .python-version
 
