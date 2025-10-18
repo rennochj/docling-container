@@ -18,6 +18,7 @@ A Docker container for [Docling](https://docling-project.github.io/docling/), a 
 - **Parallel Batch Processing**: Multi-threaded conversion for 30-60% faster batch operations
 - **Performance Optimized**: Fast startup (80-90% faster), optimized Docker build, minimal image size
 - **Pattern Filtering**: Use glob patterns to selectively process files (e.g., only PDFs)
+- **Organized Output**: Files automatically organized in subdirectories (default: `docling/`, configurable)
 - **Recursive Processing**: Process nested directory structures
 - **Comprehensive Logging**: Detailed logs with conversion statistics (clean output, no log spam)
 - **Flexible Configuration**: YAML config file support for default settings
@@ -177,13 +178,17 @@ make help
 
 ### Basic Usage
 
-The application uses `/input` and `/output` as default directories, so you only need to specify filenames:
+The application uses `/input` and `/output` as default directories, so you only need to specify filenames.
+
+**Note**: By default, converted files are organized in a `docling/` subdirectory within the output directory (e.g., `output/docling/document.md`). You can customize this with `--output-subdir`.
 
 Convert a single file:
 
 ```bash
 docker run -v /path/to/input:/input -v /path/to/output:/output \
   docling-container convert document.pdf
+
+# Output: /path/to/output/docling/document.md
 ```
 
 ### URL Conversion
@@ -334,6 +339,7 @@ docker run -v /path/to/data:/data \
 | `--workers` | | `CPU count` | Number of parallel worker threads for batch processing |
 | `--ocr` / `--no-ocr` | | `True` | Enable/disable OCR (20-40% faster when disabled for digital docs) |
 | `--table-detection` / `--no-table-detection` | | `True` | Enable/disable table detection (10-20% faster when disabled) |
+| `--output-subdir` | | `docling` | Subdirectory name within output directory for converted files |
 | `--log-level` | | `INFO` | Logging level (DEBUG, INFO, WARNING, ERROR) |
 | `--log-file` | | `None` | Optional log file path |
 | `--config` | | `None` | Path to configuration file |
@@ -459,6 +465,27 @@ docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
 ```
 
 **Result**: 50-80% faster processing for documents that don't need OCR or table extraction
+
+### Example 11: Organize Output with Custom Subdirectories
+
+```bash
+# Default behavior - files saved to output/docling/
+docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
+  docling-container convert document.pdf /output
+
+# Custom subdirectory name
+docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
+  docling-container convert document.pdf /output --output-subdir converted
+
+# Different subdirectories for different projects
+docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
+  docling-container convert --batch --output-subdir project-alpha
+```
+
+**Result**:
+- Files organized in `output/docling/document.md` (default)
+- Or `output/converted/document.md` (custom)
+- Or `output/project-alpha/` for batch projects
 
 ## Using the Makefile
 
@@ -636,6 +663,7 @@ recursive: false
 workers: 8              # Number of parallel workers (omit to auto-detect)
 ocr: true              # Enable OCR for scanned documents
 table_detection: true  # Enable table structure detection
+output_subdir: docling # Subdirectory for converted files (default: "docling")
 export_images: true
 images_scale: 2.0
 export_page_images: false

@@ -51,7 +51,8 @@ class DocumentConverter:
         logger: Optional[logging.Logger] = None,
         max_workers: Optional[int] = None,
         do_ocr: bool = True,
-        do_table_detection: bool = True
+        do_table_detection: bool = True,
+        output_subdir: str = "docling"
     ):
         """Initialize the document converter.
 
@@ -65,6 +66,7 @@ class DocumentConverter:
             max_workers: Maximum number of worker threads for batch processing (default: CPU count)
             do_ocr: Enable OCR for scanned documents (default: True)
             do_table_detection: Enable table structure detection (default: True)
+            output_subdir: Subdirectory name within output directory (default: "docling")
         """
         self.output_format = output_format.lower()
         self.preserve_structure = preserve_structure
@@ -75,6 +77,7 @@ class DocumentConverter:
         self.max_workers = max_workers or os.cpu_count() or 4
         self.do_ocr = do_ocr
         self.do_table_detection = do_table_detection
+        self.output_subdir = output_subdir
 
         # Initialize Docling converter with optimized settings
         pipeline_options = PdfPipelineOptions()
@@ -223,7 +226,7 @@ class DocumentConverter:
 
         Args:
             input_path: Path to input file
-            output_dir: Directory for output file
+            output_dir: Directory for output file (subdirectory will be appended)
 
         Returns:
             Path to the converted output file
@@ -245,16 +248,19 @@ class DocumentConverter:
             self.logger.debug(f"Converting {input_path} with format {input_format}")
             result = self.docling_converter.convert(str(input_path))
 
+            # Append subdirectory to output path
+            final_output_dir = output_dir / self.output_subdir
+
             # Ensure output directory exists
-            output_dir.mkdir(parents=True, exist_ok=True)
+            final_output_dir.mkdir(parents=True, exist_ok=True)
 
             # Generate output filename
             output_filename = input_path.stem + self._get_output_extension()
-            output_path = output_dir / output_filename
+            output_path = final_output_dir / output_filename
 
             # Extract images if requested
             if self.export_images:
-                self._extract_images(result, output_dir, input_path.stem)
+                self._extract_images(result, final_output_dir, input_path.stem)
 
             # Export to the desired format
             self._export_result(result, output_path)
@@ -271,7 +277,7 @@ class DocumentConverter:
 
         Args:
             url: URL of the document to convert
-            output_dir: Directory for output file
+            output_dir: Directory for output file (subdirectory will be appended)
 
         Returns:
             Path to the converted output file
@@ -286,8 +292,11 @@ class DocumentConverter:
             self.logger.debug(f"Converting document from URL: {url}")
             result = self.docling_converter.convert(url)
 
+            # Append subdirectory to output path
+            final_output_dir = output_dir / self.output_subdir
+
             # Ensure output directory exists
-            output_dir.mkdir(parents=True, exist_ok=True)
+            final_output_dir.mkdir(parents=True, exist_ok=True)
 
             # Generate output filename from URL
             # Extract filename from URL or use a default
@@ -303,11 +312,11 @@ class DocumentConverter:
                 filename = 'document'
 
             output_filename = filename + self._get_output_extension()
-            output_path = output_dir / output_filename
+            output_path = final_output_dir / output_filename
 
             # Extract images if requested
             if self.export_images:
-                self._extract_images(result, output_dir, filename)
+                self._extract_images(result, final_output_dir, filename)
 
             # Export to the desired format
             self._export_result(result, output_path)

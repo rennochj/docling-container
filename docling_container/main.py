@@ -176,6 +176,12 @@ def cli(ctx):
     default=True,
     help='Enable table structure detection. Disable for faster processing when tables are not needed.'
 )
+@click.option(
+    '--output-subdir',
+    type=str,
+    default='docling',
+    help='Subdirectory name within output directory for converted files. Default: "docling".'
+)
 def convert(
     input_path: str,
     output_dir: Path,
@@ -193,7 +199,8 @@ def convert(
     pattern: tuple,
     workers: Optional[int],
     ocr: bool,
-    table_detection: bool
+    table_detection: bool,
+    output_subdir: str
 ):
     """Convert document(s) from INPUT_PATH to OUTPUT_DIR.
 
@@ -266,7 +273,8 @@ def convert(
             logger=logger,
             max_workers=workers,
             do_ocr=ocr,
-            do_table_detection=table_detection
+            do_table_detection=table_detection,
+            output_subdir=output_subdir
         )
 
         # Check if input is a URL
