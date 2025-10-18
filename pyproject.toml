@@ -18,6 +18,12 @@ dev = [
 [project.scripts]
 docling-convert = "docling_container.main:cli"
 
+[tool.setuptools]
+packages = ["docling_container"]
+
+[tool.setuptools.package-data]
+docling_container = ["py.typed"]
+
 [tool.uv]
 package = true
 
