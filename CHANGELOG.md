@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 - Enhance git-cliff configuration with emojis and better categorization
+- Add glob pattern filtering for batch file processing
 
 
 ### 🐛 Bug Fixes
@@ -18,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation
 - Update CHANGELOG for unreleased changes
+- Regenerate CHANGELOG with latest changes
+
+
+### 🚜 Refactor
+- Make version management dynamic using importlib.metadata
 
 ## [0.3.1] - 2025-10-18
 
