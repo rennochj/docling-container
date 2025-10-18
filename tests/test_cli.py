@@ -2,7 +2,7 @@
 
 import pytest
 from click.testing import CliRunner
-from docling_container.main import cli, INPUT_FORMATS, OUTPUT_FORMATS, __version__
+from docling_forge.main import cli, INPUT_FORMATS, OUTPUT_FORMATS, __version__
 
 
 class TestCLI:

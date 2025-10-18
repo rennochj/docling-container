@@ -36,25 +36,25 @@ uv run pytest
 ### Docker Commands
 ```bash
 # Build the container
-docker build -t docling-container .
+docker build -t docling-forge .
 
 # Run with mounted volumes (uses /input and /output as defaults)
-docker run -v /path/to/input:/input -v /path/to/output:/output docling-container convert document.pdf
+docker run -v /path/to/input:/input -v /path/to/output:/output docling-forge convert document.pdf
 
 # Batch convert all files in input directory
-docker run -v /path/to/input:/input -v /path/to/output:/output docling-container convert --batch
+docker run -v /path/to/input:/input -v /path/to/output:/output docling-forge convert --batch
 
 # Custom paths can still be specified
-docker run -v /data:/data docling-container convert /data/file.pdf /data/output
+docker run -v /data:/data docling-forge convert /data/file.pdf /data/output
 ```
 
 ## Architecture
 
 ### Current Structure
-- `docling_container/main.py`: Entry point for the CLI with Click framework
-- `docling_container/converter.py`: Document conversion logic using Docling API
-- `docling_container/logger.py`: Structured logging system with conversion statistics
-- `docling_container/config.py`: YAML configuration file support
+- `docling_forge/main.py`: Entry point for the CLI with Click framework
+- `docling_forge/converter.py`: Document conversion logic using Docling API
+- `docling_forge/logger.py`: Structured logging system with conversion statistics
+- `docling_forge/config.py`: YAML configuration file support
 - `Dockerfile`: Multi-stage build (uv install + slim runtime)
 - `pyproject.toml`: Project metadata and dependencies (uv-managed)
 - `tests/`: Comprehensive test suite (28 tests covering CLI, converter, logging)

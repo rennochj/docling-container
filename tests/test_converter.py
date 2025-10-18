@@ -2,7 +2,7 @@
 
 import pytest
 from pathlib import Path
-from docling_container.converter import DocumentConverter, EXTENSION_TO_FORMAT
+from docling_forge.converter import DocumentConverter, EXTENSION_TO_FORMAT
 from docling.datamodel.base_models import InputFormat
 
 

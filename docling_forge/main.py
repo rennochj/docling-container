@@ -85,7 +85,7 @@ def is_url(string: str) -> bool:
 @click.pass_context
 @click.version_option(version=__version__)
 def cli(ctx):
-    """Docling Container - Document conversion tool.
+    """Docling Forge - Document conversion tool.
 
     Convert documents between various formats including HTML, Markdown,
     Microsoft Office formats, PDFs, images, and more.

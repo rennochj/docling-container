@@ -1,10 +1,10 @@
-# Docling Container
+# Docling Forge
 
-[![GitHub release](https://img.shields.io/github/v/release/rennochj/docling-container)](https://github.com/rennochj/docling-container/releases)
-[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/rennochj/docling-container/pkgs/container/docling-container)
+[![GitHub release](https://img.shields.io/github/v/release/rennochj/docling-forge)](https://github.com/rennochj/docling-forge/releases)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/rennochj/docling-forge/pkgs/container/docling-forge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Docker container for [Docling](https://docling-project.github.io/docling/), a powerful document conversion tool that converts various document formats to markdown, HTML, JSON, text, and more.
+A powerful Docker-based document conversion tool built with [Docling](https://docling-project.github.io/docling/). Transform documents between various formats including markdown, HTML, JSON, text, and more.
 
 ## Features
 
@@ -75,21 +75,21 @@ Pull the latest image from GitHub Container Registry:
 
 ```bash
 # Pull latest version
-docker pull ghcr.io/rennochj/docling-container:latest
+docker pull ghcr.io/rennochj/docling-forge:latest
 
 # Or pull a specific version
-docker pull ghcr.io/rennochj/docling-container:0.3.1
+docker pull ghcr.io/rennochj/docling-forge:0.3.1
 ```
 
 ### Building from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/rennochj/docling-container.git
-cd docling-container
+git clone https://github.com/rennochj/docling-forge.git
+cd docling-forge
 
 # Build the Docker image
-docker build -t docling-container .
+docker build -t docling-forge .
 
 # Or build for multiple platforms
 make build-multiplatform
@@ -101,13 +101,13 @@ The fastest way to get started with the pre-built image:
 
 ```bash
 # Pull the image
-docker pull ghcr.io/rennochj/docling-container:latest
+docker pull ghcr.io/rennochj/docling-forge:latest
 
 # Convert a PDF
 docker run --rm \
   -v $(pwd)/input:/input \
   -v $(pwd)/output:/output \
-  ghcr.io/rennochj/docling-container:latest \
+  ghcr.io/rennochj/docling-forge:latest \
   convert document.pdf
 ```
 
@@ -119,7 +119,7 @@ For easier usage, add an alias to your shell configuration:
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-alias docling='docker run --rm -v $(pwd)/input:/input -v $(pwd)/output:/output ghcr.io/rennochj/docling-container:latest'
+alias docling='docker run --rm -v $(pwd)/input:/input -v $(pwd)/output:/output ghcr.io/rennochj/docling-forge:latest'
 
 # Reload your shell configuration
 source ~/.bashrc  # or source ~/.zshrc
@@ -130,7 +130,7 @@ source ~/.bashrc  # or source ~/.zshrc
 ```powershell
 # Add to your PowerShell profile (run: notepad $PROFILE)
 function docling {
-    docker run --rm -v ${PWD}/input:/input -v ${PWD}/output:/output ghcr.io/rennochj/docling-container:latest $args
+    docker run --rm -v ${PWD}/input:/input -v ${PWD}/output:/output ghcr.io/rennochj/docling-forge:latest $args
 }
 ```
 
@@ -186,7 +186,7 @@ Convert a single file:
 
 ```bash
 docker run -v /path/to/input:/input -v /path/to/output:/output \
-  docling-container convert document.pdf
+  docling-forge convert document.pdf
 
 # Output: /path/to/output/docling/document.md
 ```
@@ -197,13 +197,13 @@ Convert documents directly from URLs:
 
 ```bash
 docker run -v /path/to/output:/output \
-  docling-container convert https://arxiv.org/pdf/2408.09869 /output
+  docling-forge convert https://arxiv.org/pdf/2408.09869 /output
 ```
 
 ```bash
 # Convert any publicly accessible PDF
 docker run -v $(pwd)/output:/output \
-  docling-container convert https://example.com/document.pdf /output -f markdown
+  docling-forge convert https://example.com/document.pdf /output -f markdown
 ```
 
 ### Image Extraction
@@ -213,19 +213,19 @@ Extract images from documents while converting. By default, only figures and tab
 ```bash
 # Extract figures and tables (recommended)
 docker run -v /path/to/input:/input -v /path/to/output:/output \
-  docling-container convert document.pdf /output --export-images
+  docling-forge convert document.pdf /output --export-images
 ```
 
 ```bash
 # Extract with high resolution (4x scale = 288 DPI)
 docker run -v /path/to/input:/input -v /path/to/output:/output \
-  docling-container convert document.pdf /output --export-images --images-scale 4.0
+  docling-forge convert document.pdf /output --export-images --images-scale 4.0
 ```
 
 ```bash
 # Extract ALL images including full page renders
 docker run -v /path/to/input:/input -v /path/to/output:/output \
-  docling-container convert document.pdf /output --export-images --export-page-images
+  docling-forge convert document.pdf /output --export-images --export-page-images
 ```
 
 Images are saved to a subdirectory named `{document}_images/` and referenced in the output:
@@ -239,14 +239,14 @@ Convert all documents in the input directory:
 
 ```bash
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert --batch
+  docling-forge convert --batch
 ```
 
 Or use an explicit directory:
 
 ```bash
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert . --batch
+  docling-forge convert . --batch
 ```
 
 Filter files using glob patterns:
@@ -254,15 +254,15 @@ Filter files using glob patterns:
 ```bash
 # Convert only PDF files
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert --batch --pattern "*.pdf"
+  docling-forge convert --batch --pattern "*.pdf"
 
 # Convert multiple file types
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert --batch --pattern "*.pdf" --pattern "*.docx"
+  docling-forge convert --batch --pattern "*.pdf" --pattern "*.docx"
 
 # Pattern matching for specific filenames
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert --batch --pattern "report_*.pdf"
+  docling-forge convert --batch --pattern "report_*.pdf"
 ```
 
 ### Recursive Processing
@@ -271,7 +271,7 @@ Process directories recursively:
 
 ```bash
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert -r --log-level INFO
+  docling-forge convert -r --log-level INFO
 ```
 
 Combine recursive mode with patterns:
@@ -279,11 +279,11 @@ Combine recursive mode with patterns:
 ```bash
 # Convert all PDFs recursively
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert -r --pattern "*.pdf"
+  docling-forge convert -r --pattern "*.pdf"
 
 # Convert specific file types from all subdirectories
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert -r --pattern "*.pdf" --pattern "*.docx" --pattern "*.pptx"
+  docling-forge convert -r --pattern "*.pdf" --pattern "*.docx" --pattern "*.pptx"
 ```
 
 ### Output Format Selection
@@ -292,7 +292,7 @@ Convert to HTML instead of markdown:
 
 ```bash
 docker run -v /path/to/input:/input -v /path/to/output:/output \
-  docling-container convert document.pdf -f html
+  docling-forge convert document.pdf -f html
 ```
 
 ### Advanced Options
@@ -301,7 +301,7 @@ Full example with all options:
 
 ```bash
 docker run -v /path/to/docs:/input -v /path/to/output:/output \
-  docling-container convert \
+  docling-forge convert \
     --output-format markdown \
     --batch \
     --recursive \
@@ -318,7 +318,7 @@ You can still specify custom paths if needed:
 
 ```bash
 docker run -v /path/to/data:/data \
-  docling-container convert /data/document.pdf /data/output
+  docling-forge convert /data/document.pdf /data/output
 ```
 
 ## CLI Options
@@ -355,7 +355,7 @@ docker run -v /path/to/data:/data \
 
 ```bash
 docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  docling-container convert report.pdf
+  docling-forge convert report.pdf
 ```
 
 **Output**: `output/report.md`
@@ -364,7 +364,7 @@ docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
 
 ```bash
 docker run -v $(pwd)/output:/output \
-  docling-container convert https://arxiv.org/pdf/2408.09869 /output \
+  docling-forge convert https://arxiv.org/pdf/2408.09869 /output \
     -f markdown --export-images
 ```
 
@@ -376,7 +376,7 @@ docker run -v $(pwd)/output:/output \
 
 ```bash
 docker run -v $(pwd)/documents:/input -v $(pwd)/converted:/output \
-  docling-container convert -f html --batch
+  docling-forge convert -f html --batch
 ```
 
 **Result**: All supported documents in `documents/` converted to HTML in `converted/`
@@ -385,7 +385,7 @@ docker run -v $(pwd)/documents:/input -v $(pwd)/converted:/output \
 
 ```bash
 docker run -v $(pwd)/docs:/input -v $(pwd)/output:/output -v $(pwd)/logs:/logs \
-  docling-container convert \
+  docling-forge convert \
     -r \
     --log-level DEBUG \
     --log-file /logs/conversion.log
@@ -397,7 +397,7 @@ docker run -v $(pwd)/docs:/input -v $(pwd)/output:/output -v $(pwd)/logs:/logs \
 
 ```bash
 docker run -v $(pwd)/images:/input -v $(pwd)/text:/output \
-  docling-container convert -f text --batch
+  docling-forge convert -f text --batch
 ```
 
 **Result**: OCR extraction from images exported as text files
@@ -406,7 +406,7 @@ docker run -v $(pwd)/images:/input -v $(pwd)/text:/output \
 
 ```bash
 docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  docling-container convert presentation.pptx /output \
+  docling-forge convert presentation.pptx /output \
     --export-images --images-scale 4.0
 ```
 
@@ -417,15 +417,15 @@ docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
 ```bash
 # Convert only PDF files
 docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
-  docling-container convert --batch --pattern "*.pdf"
+  docling-forge convert --batch --pattern "*.pdf"
 
 # Convert multiple specific file types
 docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
-  docling-container convert --batch --pattern "*.pdf" --pattern "*.docx" --pattern "*.pptx"
+  docling-forge convert --batch --pattern "*.pdf" --pattern "*.docx" --pattern "*.pptx"
 
 # Pattern matching with recursive processing
 docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
-  docling-container convert -r --pattern "report_*.pdf"
+  docling-forge convert -r --pattern "report_*.pdf"
 ```
 
 **Result**: Only files matching the specified pattern(s) are converted
@@ -433,7 +433,7 @@ docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
 ### Example 8: List Supported Formats
 
 ```bash
-docker run docling-container formats
+docker run docling-forge formats
 ```
 
 ### Example 9: Fast Batch Processing with Parallel Workers
@@ -441,11 +441,11 @@ docker run docling-container formats
 ```bash
 # Use 8 parallel workers for faster processing
 docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
-  docling-container convert --batch --workers 8
+  docling-forge convert --batch --workers 8
 
 # Process with maximum parallelism (auto-detects CPU cores)
 docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
-  docling-container convert --batch
+  docling-forge convert --batch
 ```
 
 **Result**: Files processed concurrently for 30-60% faster batch conversions
@@ -455,12 +455,12 @@ docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
 ```bash
 # Disable OCR and table detection for digital-only PDFs
 docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  docling-container convert document.pdf /output \
+  docling-forge convert document.pdf /output \
     --no-ocr --no-table-detection
 
 # Batch process digital documents at maximum speed
 docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
-  docling-container convert --batch --workers 8 \
+  docling-forge convert --batch --workers 8 \
     --no-ocr --no-table-detection --pattern "*.pdf"
 ```
 
@@ -471,15 +471,15 @@ docker run -v $(pwd)/documents:/input -v $(pwd)/output:/output \
 ```bash
 # Default behavior - files saved to output/docling/
 docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  docling-container convert document.pdf /output
+  docling-forge convert document.pdf /output
 
 # Custom subdirectory name
 docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  docling-container convert document.pdf /output --output-subdir converted
+  docling-forge convert document.pdf /output --output-subdir converted
 
 # Different subdirectories for different projects
 docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  docling-container convert --batch --output-subdir project-alpha
+  docling-forge convert --batch --output-subdir project-alpha
 ```
 
 **Result**:
@@ -543,8 +543,8 @@ uv run pytest
 ### Project Structure
 
 ```
-docling-container/
-├── docling_container/      # Main application package
+docling-forge/
+├── docling_forge/         # Main application package
 │   ├── __init__.py
 │   ├── main.py            # CLI interface
 │   ├── converter.py       # Document conversion logic
@@ -578,7 +578,7 @@ chmod -R 777 /path/to/output
 **Solution**: Check the list of supported formats:
 
 ```bash
-docker run docling-container formats
+docker run docling-forge formats
 ```
 
 ### Issue: Out of Memory
@@ -589,7 +589,7 @@ docker run docling-container formats
 
 ```bash
 docker run --memory=4g -v /input:/input -v /output:/output \
-  docling-container convert /input /output
+  docling-forge convert /input /output
 ```
 
 ### Issue: Conversion Fails Silently
@@ -600,7 +600,7 @@ docker run --memory=4g -v /input:/input -v /output:/output \
 
 ```bash
 docker run -v /input:/input -v /output:/output \
-  docling-container convert /input /output --log-level DEBUG
+  docling-forge convert /input /output --log-level DEBUG
 ```
 
 ### Issue: URL Conversion Fails
@@ -621,11 +621,11 @@ docker run -v /input:/input -v /output:/output \
 ```bash
 # Good - only figures and tables
 docker run -v /input:/input -v /output:/output \
-  docling-container convert doc.pdf /output --export-images
+  docling-forge convert doc.pdf /output --export-images
 
 # Includes page renders (usually not needed)
 docker run -v /input:/input -v /output:/output \
-  docling-container convert doc.pdf /output --export-images --export-page-images
+  docling-forge convert doc.pdf /output --export-images --export-page-images
 ```
 
 ## Performance Tips
@@ -673,7 +673,7 @@ Use with:
 
 ```bash
 docker run -v $(pwd)/config.yaml:/config.yaml -v /input:/input -v /output:/output \
-  docling-container convert /input /output --config /config.yaml
+  docling-forge convert /input /output --config /config.yaml
 ```
 
 ## Contributing
@@ -736,7 +736,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For issues and questions:
 - Check the [Troubleshooting](#troubleshooting) section
 - Review [Docling Documentation](https://docling-project.github.io/docling/)
-- Open an issue on [GitHub](https://github.com/rennochj/docling-container/issues)
+- Open an issue on [GitHub](https://github.com/rennochj/docling-forge/issues)
 
 ## Changelog
 

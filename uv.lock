@@ -255,34 +255,6 @@ wheels = [
 ]
 
 [[package]]
-name = "docling-container"
-version = "0.3.5"
-source = { editable = "." }
-dependencies = [
-    { name = "click" },
-    { name = "docling" },
-    { name = "opencv-python-headless" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "click", specifier = ">=8.1.0" },
-    { name = "docling", specifier = ">=2.0.0" },
-    { name = "opencv-python-headless", specifier = ">=4.0.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
-    { name = "pyyaml", specifier = ">=6.0.0" },
-]
-provides-extras = ["dev"]
-
-[[package]]
 name = "docling-core"
 version = "2.49.0"
 source = { registry = "https://pkgs.safetycli.com/repository/personal-63a24/pypi/simple/" }
@@ -308,6 +280,34 @@ chunking = [
     { name = "semchunk" },
     { name = "transformers" },
 ]
+
+[[package]]
+name = "docling-forge"
+version = "0.3.6"
+source = { editable = "." }
+dependencies = [
+    { name = "click" },
+    { name = "docling" },
+    { name = "opencv-python-headless" },
+    { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "click", specifier = ">=8.1.0" },
+    { name = "docling", specifier = ">=2.0.0" },
+    { name = "opencv-python-headless", specifier = ">=4.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "docling-ibm-models"

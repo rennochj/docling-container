@@ -3,7 +3,7 @@
 import pytest
 import logging
 from pathlib import Path
-from docling_container.logger import setup_logging, ConversionLogger
+from docling_forge.logger import setup_logging, ConversionLogger
 
 
 class TestLogging:
@@ -12,7 +12,7 @@ class TestLogging:
     def test_setup_logging_default(self):
         """Test default logging setup."""
         logger = setup_logging()
-        assert logger.name == "docling_container"
+        assert logger.name == "docling_forge"
         assert logger.level == logging.INFO
 
     def test_setup_logging_debug(self):

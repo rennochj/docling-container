@@ -1,6 +1,6 @@
 # Example Documents
 
-This directory contains sample documents for testing the docling-container conversion functionality.
+This directory contains sample documents for testing the docling-forge conversion functionality.
 
 ## Available Examples
 

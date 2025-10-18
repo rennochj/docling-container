@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for docling-container
+# Multi-stage Dockerfile for docling-forge
 # Stage 1: Build and install dependencies using uv
 FROM python:3.13-slim AS builder
 
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Copy application code (needed for package installation)
-COPY docling_container/ ./docling_container/
+COPY docling_forge/ ./docling_forge/
 
 # Install dependencies using uv sync
 # This creates a .venv directory and uses the lock file for exact dependency versions
@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /app/.venv /app/.venv
 
 # Copy application code
-COPY --from=builder /app/docling_container /app/docling_container
+COPY --from=builder /app/docling_forge /app/docling_forge
 
 # Set environment variables
 ENV VIRTUAL_ENV=/app/.venv
@@ -68,7 +68,7 @@ RUN /app/.venv/bin/python /tmp/prefetch-models.py && rm /tmp/prefetch-models.py
 VOLUME ["/input", "/output"]
 
 # Set the entrypoint to the CLI
-ENTRYPOINT ["python", "-m", "docling_container.main"]
+ENTRYPOINT ["python", "-m", "docling_forge.main"]
 
 # Default command shows help
 CMD ["--help"]

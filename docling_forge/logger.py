@@ -30,7 +30,7 @@ def setup_logging(
         Configured logger instance
     """
     # Create logger
-    logger = logging.getLogger("docling_container")
+    logger = logging.getLogger("docling_forge")
     logger.setLevel(getattr(logging, log_level.upper()))
 
     # Prevent propagation to root logger to avoid duplicate messages

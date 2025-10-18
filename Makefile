@@ -1,11 +1,11 @@
-# Makefile for docling-container
+# Makefile for docling-forge
 # Common operations for building and running the Docling document conversion container
 
 # Variables
-IMAGE_NAME := docling-container
+IMAGE_NAME := docling-forge
 IMAGE_TAG := latest
 FULL_IMAGE := $(IMAGE_NAME):$(IMAGE_TAG)
-GHCR_IMAGE := ghcr.io/rennochj/docling-container:latest
+GHCR_IMAGE := ghcr.io/rennochj/docling-forge:latest
 INPUT_DIR := $(PWD)/examples
 OUTPUT_DIR := $(PWD)/output
 DOCKER_RUN := docker run --rm -v $(INPUT_DIR):/input -v $(OUTPUT_DIR):/output $(FULL_IMAGE)

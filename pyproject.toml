@@ -1,7 +1,7 @@
 [project]
-name = "docling-container"
+name = "docling-forge"
 version = "0.3.6"
-description = "Docker container for Docling document conversion tool"
+description = "Powerful Docker-based document conversion tool built with Docling"
 requires-python = ">=3.13"
 dependencies = [
     "docling>=2.0.0",
@@ -17,14 +17,14 @@ dev = [
 ]
 
 [project.scripts]
-docling-convert = "docling_container.main:cli"
-docling = "docling_container.main:cli"
+docling-convert = "docling_forge.main:cli"
+docling = "docling_forge.main:cli"
 
 [tool.setuptools]
-packages = ["docling_container"]
+packages = ["docling_forge"]
 
 [tool.setuptools.package-data]
-docling_container = ["py.typed"]
+docling_forge = ["py.typed"]
 
 [tool.uv]
 package = true
