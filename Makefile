@@ -20,7 +20,7 @@ DOCKER_RUN_GHCR := docker run --rm -v $(INPUT_DIR):/input -v $(OUTPUT_DIR):/outp
         build-multiplatform push-ghcr setup-buildx changelog \
         ghcr-pull ghcr-run-html ghcr-run-md ghcr-run-pdf ghcr-run-pptx ghcr-run-image \
         ghcr-run-url ghcr-run-batch ghcr-run-all ghcr-run-pdf-images ghcr-run-pptx-images \
-        ghcr-quick-start
+        ghcr-quick-start git-status git-commit git-push git-commit-push
 
 ##@ General
 
@@ -162,6 +162,37 @@ version: ## Show Docker and tool versions
 	@docker run --rm $(FULL_IMAGE) python --version 2>/dev/null || echo "Image not built yet"
 	@echo "\nLocal uv version:"
 	@uv --version 2>/dev/null || echo "uv not installed locally"
+
+##@ Git Operations
+
+git-status: ## Show git status
+	@git status
+
+git-commit: ## Stage and commit all changes (use: make git-commit MSG="your message")
+	@if [ -z "$(MSG)" ]; then \
+		echo "❌ Error: Commit message required"; \
+		echo "Usage: make git-commit MSG=\"your commit message\""; \
+		exit 1; \
+	fi
+	@echo "📝 Staging all changes..."
+	@git add -A
+	@echo "💾 Committing with message: $(MSG)"
+	@git commit -m "$(MSG)" -m "" -m "🤖 Generated with [Claude Code](https://claude.com/claude-code)" -m "" -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+	@echo "✅ Changes committed successfully!"
+
+git-push: ## Push commits to remote repository
+	@echo "🚀 Pushing to remote repository..."
+	@git push
+	@echo "✅ Pushed successfully!"
+
+git-commit-push: ## Stage, commit, and push all changes (use: make git-commit-push MSG="your message")
+	@if [ -z "$(MSG)" ]; then \
+		echo "❌ Error: Commit message required"; \
+		echo "Usage: make git-commit-push MSG=\"your commit message\""; \
+		exit 1; \
+	fi
+	@$(MAKE) git-commit MSG="$(MSG)"
+	@$(MAKE) git-push
 
 ##@ Versioning & Release
 
