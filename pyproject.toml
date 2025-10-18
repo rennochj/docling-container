@@ -36,6 +36,7 @@ python_functions = ["test_*"]
 filterwarnings = [
     "error",  # Turn warnings into errors for our own code
     "ignore::DeprecationWarning:docling_core",  # Ignore deprecations from docling_core
-    "ignore::pydantic.warnings.PydanticDeprecatedSince212",  # Ignore Pydantic deprecations from dependencies
     "ignore::DeprecationWarning:pydantic",  # Ignore Pydantic deprecation warnings
+    "ignore::UserWarning:pydantic",  # Ignore Pydantic user warnings
+    "ignore:.*@model_validator.*:DeprecationWarning",  # Ignore model_validator deprecation warnings
 ]
