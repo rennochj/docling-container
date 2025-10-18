@@ -1,0 +1,28 @@
+[project]
+name = "docling-container"
+version = "0.1.0"
+description = "Docker container for Docling document conversion tool"
+requires-python = ">=3.13"
+dependencies = [
+    "docling>=2.0.0",
+    "click>=8.1.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+]
+
+[project.scripts]
+docling-convert = "docling_container.main:cli"
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

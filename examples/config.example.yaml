@@ -1,0 +1,20 @@
+# Docling Container Configuration File
+# This file contains default settings for document conversion
+
+# Output format: markdown, html, json, text, or doctags
+output_format: markdown
+
+# Preserve original document structure during conversion
+preserve_structure: true
+
+# Logging verbosity level: DEBUG, INFO, WARNING, or ERROR
+log_level: INFO
+
+# Enable batch processing for directories
+batch: true
+
+# Recursively process subdirectories
+recursive: false
+
+# Stop processing on first error
+fail_fast: false
