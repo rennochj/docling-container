@@ -98,6 +98,22 @@ def cli(ctx):
     default=False,
     help='Stop on first error (fail-fast) or continue processing.'
 )
+@click.option(
+    '--export-images/--no-export-images',
+    default=False,
+    help='Extract and save images from documents to a subdirectory.'
+)
+@click.option(
+    '--images-scale',
+    type=float,
+    default=2.0,
+    help='Resolution scale for exported images (1.0 = 72 DPI, 2.0 = 144 DPI).'
+)
+@click.option(
+    '--export-page-images/--no-export-page-images',
+    default=False,
+    help='Include full page images in extraction (usually not needed).'
+)
 def convert(
     input_path: str,
     output_dir: Path,
@@ -108,7 +124,10 @@ def convert(
     log_file: Optional[Path],
     config: Optional[Path],
     preserve_structure: bool,
-    fail_fast: bool
+    fail_fast: bool,
+    export_images: bool,
+    images_scale: float,
+    export_page_images: bool
 ):
     """Convert document(s) from INPUT_PATH to OUTPUT_DIR.
 
@@ -148,6 +167,9 @@ def convert(
         converter = DocumentConverter(
             output_format=output_format,
             preserve_structure=preserve_structure,
+            export_images=export_images,
+            images_scale=images_scale,
+            export_page_images=export_page_images,
             logger=logger
         )
 

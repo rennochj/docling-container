@@ -9,6 +9,7 @@ from docling.document_converter import DocumentConverter as DoclingConverter
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import PdfFormatOption
+from docling_core.types.doc import PictureItem, TableItem, ImageRefMode
 
 from .logger import ConversionLogger
 
@@ -42,6 +43,9 @@ class DocumentConverter:
         self,
         output_format: str = "markdown",
         preserve_structure: bool = True,
+        export_images: bool = False,
+        images_scale: float = 2.0,
+        export_page_images: bool = False,
         logger: Optional[logging.Logger] = None
     ):
         """Initialize the document converter.
@@ -49,16 +53,28 @@ class DocumentConverter:
         Args:
             output_format: Target output format (markdown, html, json, text, doctags)
             preserve_structure: Whether to preserve document structure
+            export_images: Whether to extract and save images
+            images_scale: Resolution scale for images (1.0 = 72 DPI, 2.0 = 144 DPI)
+            export_page_images: Whether to extract full page images (default: False)
             logger: Optional logger instance
         """
         self.output_format = output_format.lower()
         self.preserve_structure = preserve_structure
+        self.export_images = export_images
+        self.images_scale = images_scale
+        self.export_page_images = export_page_images
         self.logger = logger or logging.getLogger(__name__)
 
         # Initialize Docling converter with optimized settings
         pipeline_options = PdfPipelineOptions()
         pipeline_options.do_ocr = True
         pipeline_options.do_table_structure = True
+
+        # Enable image generation if export_images is True
+        if export_images:
+            pipeline_options.images_scale = images_scale
+            pipeline_options.generate_page_images = export_page_images
+            pipeline_options.generate_picture_images = True
 
         self.docling_converter = DoclingConverter(
             format_options={
@@ -90,6 +106,82 @@ class DocumentConverter:
             'doctags': '.doctags'
         }
         return extension_map.get(self.output_format, '.md')
+
+    def _extract_images(self, result, output_dir: Path, doc_name: str) -> int:
+        """Extract and save images from conversion result.
+
+        Args:
+            result: Docling conversion result
+            output_dir: Directory to save images
+            doc_name: Base name for the document (used in image filenames)
+
+        Returns:
+            Number of images extracted
+        """
+        if not self.export_images:
+            return 0
+
+        # Create images subdirectory
+        images_dir = output_dir / f"{doc_name}_images"
+        images_dir.mkdir(parents=True, exist_ok=True)
+
+        # Relative path for image references (relative to output document)
+        images_dir_name = f"{doc_name}_images"
+
+        image_count = 0
+
+        # Extract page images (only if export_page_images is True)
+        if self.export_page_images:
+            for page_no, page in result.document.pages.items():
+                if hasattr(page, 'image') and page.image and hasattr(page.image, 'pil_image'):
+                    page_image_filename = f"page_{page.page_no}.png"
+                    page_image_path = images_dir / page_image_filename
+                    try:
+                        page.image.pil_image.save(str(page_image_path), format="PNG")
+                        # Update the image URI to point to the saved file
+                        page.image.uri = f"{images_dir_name}/{page_image_filename}"
+                        self.logger.debug(f"Saved page image: {page_image_path}")
+                        image_count += 1
+                    except Exception as e:
+                        self.logger.warning(f"Failed to save page {page.page_no} image: {e}")
+
+        # Extract figure and table images
+        picture_counter = 0
+        table_counter = 0
+
+        for element, _level in result.document.iterate_items():
+            if isinstance(element, PictureItem):
+                if hasattr(element, 'image') and element.image and hasattr(element.image, 'pil_image'):
+                    picture_counter += 1
+                    picture_filename = f"figure_{picture_counter}.png"
+                    picture_path = images_dir / picture_filename
+                    try:
+                        element.image.pil_image.save(str(picture_path), format="PNG")
+                        # Update the image URI to point to the saved file
+                        element.image.uri = f"{images_dir_name}/{picture_filename}"
+                        self.logger.debug(f"Saved figure: {picture_path}")
+                        image_count += 1
+                    except Exception as e:
+                        self.logger.warning(f"Failed to save figure {picture_counter}: {e}")
+
+            elif isinstance(element, TableItem):
+                if hasattr(element, 'image') and element.image and hasattr(element.image, 'pil_image'):
+                    table_counter += 1
+                    table_filename = f"table_{table_counter}.png"
+                    table_path = images_dir / table_filename
+                    try:
+                        element.image.pil_image.save(str(table_path), format="PNG")
+                        # Update the image URI to point to the saved file
+                        element.image.uri = f"{images_dir_name}/{table_filename}"
+                        self.logger.debug(f"Saved table: {table_path}")
+                        image_count += 1
+                    except Exception as e:
+                        self.logger.warning(f"Failed to save table {table_counter}: {e}")
+
+        if image_count > 0:
+            self.logger.info(f"Extracted {image_count} images to {images_dir}")
+
+        return image_count
 
     def convert_file(self, input_path: Path, output_dir: Path) -> Path:
         """Convert a single file.
@@ -124,6 +216,10 @@ class DocumentConverter:
             # Generate output filename
             output_filename = input_path.stem + self._get_output_extension()
             output_path = output_dir / output_filename
+
+            # Extract images if requested
+            if self.export_images:
+                self._extract_images(result, output_dir, input_path.stem)
 
             # Export to the desired format
             self._export_result(result, output_path)
@@ -174,6 +270,10 @@ class DocumentConverter:
             output_filename = filename + self._get_output_extension()
             output_path = output_dir / output_filename
 
+            # Extract images if requested
+            if self.export_images:
+                self._extract_images(result, output_dir, filename)
+
             # Export to the desired format
             self._export_result(result, output_path)
 
@@ -191,10 +291,13 @@ class DocumentConverter:
             result: Docling conversion result
             output_path: Path to save the output
         """
+        # Use REFERENCED mode for images if we're extracting them
+        image_mode = ImageRefMode.REFERENCED if self.export_images else ImageRefMode.PLACEHOLDER
+
         if self.output_format == 'markdown':
-            content = result.document.export_to_markdown()
+            content = result.document.export_to_markdown(image_mode=image_mode)
         elif self.output_format == 'html':
-            content = result.document.export_to_html()
+            content = result.document.export_to_html(image_mode=image_mode)
         elif self.output_format == 'json':
             content = result.document.export_to_json()
         elif self.output_format == 'text':

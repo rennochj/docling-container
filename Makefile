@@ -87,6 +87,28 @@ run-batch-html: ## Run batch conversion to HTML format
 
 run-all: run-html run-md run-html-json ## Run all individual example conversions
 
+##@ Image Extraction Examples
+
+run-pptx-images: ## Convert architecture-example.pptx to markdown
+	@echo "Converting architecture-example.pptx to markdown..."
+	$(DOCKER_RUN) convert /input/architecture-example.pptx /output -f markdown --export-images
+
+run-pdf-images: ## Convert PDF and extract images
+	@echo "Converting file-example_PDF_1MB.pdf with image extraction..."
+	$(DOCKER_RUN) convert file-example_PDF_1MB.pdf /output -f markdown --export-images
+
+run-url-images: ## Convert URL and extract images
+	@echo "Converting https://arxiv.org/pdf/2408.09869 with image extraction..."
+	$(DOCKER_RUN) convert https://arxiv.org/pdf/2408.09869 /output -f markdown --export-images
+
+run-images-hires: ## Convert PDF with high-resolution images (4x scale)
+	@echo "Converting file-example_PDF_1MB.pdf with high-res images..."
+	$(DOCKER_RUN) convert file-example_PDF_1MB.pdf /output -f markdown --export-images --images-scale 4.0
+
+run-images-with-pages: ## Convert PDF and extract ALL images including page renders
+	@echo "Converting file-example_PDF_1MB.pdf with all images (including pages)..."
+	$(DOCKER_RUN) convert file-example_PDF_1MB.pdf /output -f markdown --export-images --export-page-images
+
 ##@ Development
 
 shell: ## Open a shell in the container
