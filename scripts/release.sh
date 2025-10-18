@@ -262,7 +262,7 @@ create_github_release() {
     local release_notes=""
     if [ -f "CHANGELOG.md" ] && command -v git-cliff &> /dev/null; then
         # Get changelog section for this version
-        release_notes=$(git-cliff --unreleased --strip header)
+        release_notes=$(git-cliff --latest --strip header)
     else
         release_notes="Release v${VERSION}"
     fi
