@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle already-committed changes in release script
 - Rename .cliff.toml to cliff.toml to resolve warning
 
+
+### 📚 Documentation
+- Update CHANGELOG for unreleased changes
+
 ## [0.3.1] - 2025-10-18
 
 ### 🚀 Features
