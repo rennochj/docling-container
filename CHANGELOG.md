@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### 🚀 Features
+- Add version logging and shorter command alias
+
+
+### 🐛 Bug Fixes
+- Properly format ANSI escape codes in release script
+- Correct pytest warning filter for pydantic deprecations
+
+## [0.3.3] - 2025-10-18
+
+### 🚀 Features
 - Enhance git-cliff configuration with emojis and better categorization
 - Add glob pattern filtering for batch file processing
 
