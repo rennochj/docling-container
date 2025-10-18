@@ -2,7 +2,7 @@
 
 import pytest
 from click.testing import CliRunner
-from docling_container.main import cli, INPUT_FORMATS, OUTPUT_FORMATS
+from docling_container.main import cli, INPUT_FORMATS, OUTPUT_FORMATS, __version__
 
 
 class TestCLI:
@@ -22,7 +22,7 @@ class TestCLI:
         """Test CLI version command."""
         result = self.runner.invoke(cli, ['--version'])
         assert result.exit_code == 0
-        assert '0.1.0' in result.output
+        assert __version__ in result.output
 
     def test_convert_help(self):
         """Test convert command help."""

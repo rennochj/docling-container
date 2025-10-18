@@ -5,10 +5,17 @@ import logging
 from pathlib import Path
 from typing import Optional
 import re
+from importlib.metadata import version, PackageNotFoundError
 
 from .converter import DocumentConverter
 from .logger import setup_logging
 from .config import Config
+
+# Get version from package metadata
+try:
+    __version__ = version("docling-container")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 
 # Supported formats (must match converter.py EXTENSION_TO_FORMAT)
@@ -42,7 +49,7 @@ def is_url(string: str) -> bool:
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@click.version_option(version="0.3.1")
+@click.version_option(version=__version__)
 def cli(ctx):
     """Docling Container - Document conversion tool.
 
