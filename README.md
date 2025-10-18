@@ -80,6 +80,47 @@ docker run --rm \
   convert document.pdf
 ```
 
+### Shell Aliases (Recommended)
+
+For easier usage, add an alias to your shell configuration:
+
+**macOS / Linux (Bash/Zsh):**
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+alias docling='docker run --rm -v $(pwd)/input:/input -v $(pwd)/output:/output ghcr.io/rennochj/docling-container:latest'
+
+# Reload your shell configuration
+source ~/.bashrc  # or source ~/.zshrc
+```
+
+**Windows (PowerShell):**
+
+```powershell
+# Add to your PowerShell profile (run: notepad $PROFILE)
+function docling {
+    docker run --rm -v ${PWD}/input:/input -v ${PWD}/output:/output ghcr.io/rennochj/docling-container:latest $args
+}
+```
+
+**After setting up the alias, you can use it like this:**
+
+```bash
+# Convert a PDF
+docling convert document.pdf
+
+# Convert from URL
+docling convert https://arxiv.org/pdf/2408.09869 /output
+
+# Batch convert with image extraction
+docling convert --batch --export-images
+
+# See all options
+docling convert --help
+```
+
+### Building from Source
+
 Or if you're building from source, use Make targets:
 
 ```bash
