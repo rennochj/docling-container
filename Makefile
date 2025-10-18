@@ -120,6 +120,54 @@ run-images-with-pages: ## Convert PDF and extract ALL images including page rend
 	@echo "Converting file-example_PDF_1MB.pdf with all images (including pages)..."
 	$(DOCKER_RUN) convert file-example_PDF_1MB.pdf /output -f markdown --export-images --export-page-images
 
+##@ GHCR Examples (Using Published Image)
+
+ghcr-pull: ## Pull the latest image from GitHub Container Registry
+	@echo "Pulling latest image from GHCR..."
+	docker pull $(GHCR_IMAGE)
+	@echo "✓ Image pulled successfully!"
+
+ghcr-run-html: ## [GHCR] Convert sample.html to markdown
+	@echo "Converting sample.html to markdown (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert /input/sample.html /output -f markdown
+
+ghcr-run-md: ## [GHCR] Convert sample.md to HTML
+	@echo "Converting sample.md to HTML (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert /input/sample.md /output -f html
+
+ghcr-run-pdf: ## [GHCR] Convert file-example_PDF_1MB.pdf to markdown
+	@echo "Converting file-example_PDF_1MB.pdf to markdown (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert file-example_PDF_1MB.pdf /output -f markdown
+
+ghcr-run-pptx: ## [GHCR] Convert architecture-example.pptx to markdown
+	@echo "Converting architecture-example.pptx to markdown (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert /input/architecture-example.pptx /output -f markdown
+
+ghcr-run-image: ## [GHCR] Convert figure_3.png to markdown
+	@echo "Converting figure_3.png to markdown (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert figure_3.png /output -f markdown
+
+ghcr-run-url: ## [GHCR] Convert https://arxiv.org/pdf/2408.09869 to markdown
+	@echo "Converting URL to markdown (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert https://arxiv.org/pdf/2408.09869 /output -f markdown
+
+ghcr-run-batch: ## [GHCR] Run batch conversion on all files in examples/
+	@echo "Running batch conversion (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert --batch -f markdown
+
+ghcr-run-pdf-images: ## [GHCR] Convert PDF and extract images
+	@echo "Converting file-example_PDF_1MB.pdf with image extraction (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert file-example_PDF_1MB.pdf /output -f markdown --export-images
+
+ghcr-run-pptx-images: ## [GHCR] Convert architecture-example.pptx and extract images
+	@echo "Converting architecture-example.pptx with image extraction (using GHCR image)..."
+	$(DOCKER_RUN_GHCR) convert /input/architecture-example.pptx /output -f markdown --export-images
+
+ghcr-run-all: ghcr-run-html ghcr-run-md ghcr-run-pdf ghcr-run-pptx ghcr-run-image ## [GHCR] Run all example conversions
+
+ghcr-quick-start: setup ghcr-pull ghcr-run-batch show-output ## Pull from GHCR and run batch conversion
+	@echo "\n✓ GHCR quick start complete! Check output/ for converted files."
+
 ##@ Development
 
 shell: ## Open a shell in the container
@@ -227,51 +275,3 @@ release-major: ## Create a major release (0.1.0 -> 1.0.0)
 
 quick-start: setup build run-batch show-output ## Setup, build, and run batch conversion
 	@echo "\n✓ Quick start complete! Check output/ for converted files."
-
-##@ GHCR Examples (Using Published Image)
-
-ghcr-pull: ## Pull the latest image from GitHub Container Registry
-	@echo "Pulling latest image from GHCR..."
-	docker pull $(GHCR_IMAGE)
-	@echo "✓ Image pulled successfully!"
-
-ghcr-run-html: ## [GHCR] Convert sample.html to markdown
-	@echo "Converting sample.html to markdown (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert /input/sample.html /output -f markdown
-
-ghcr-run-md: ## [GHCR] Convert sample.md to HTML
-	@echo "Converting sample.md to HTML (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert /input/sample.md /output -f html
-
-ghcr-run-pdf: ## [GHCR] Convert file-example_PDF_1MB.pdf to markdown
-	@echo "Converting file-example_PDF_1MB.pdf to markdown (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert file-example_PDF_1MB.pdf /output -f markdown
-
-ghcr-run-pptx: ## [GHCR] Convert architecture-example.pptx to markdown
-	@echo "Converting architecture-example.pptx to markdown (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert /input/architecture-example.pptx /output -f markdown
-
-ghcr-run-image: ## [GHCR] Convert figure_3.png to markdown
-	@echo "Converting figure_3.png to markdown (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert figure_3.png /output -f markdown
-
-ghcr-run-url: ## [GHCR] Convert https://arxiv.org/pdf/2408.09869 to markdown
-	@echo "Converting URL to markdown (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert https://arxiv.org/pdf/2408.09869 /output -f markdown
-
-ghcr-run-batch: ## [GHCR] Run batch conversion on all files in examples/
-	@echo "Running batch conversion (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert --batch -f markdown
-
-ghcr-run-pdf-images: ## [GHCR] Convert PDF and extract images
-	@echo "Converting file-example_PDF_1MB.pdf with image extraction (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert file-example_PDF_1MB.pdf /output -f markdown --export-images
-
-ghcr-run-pptx-images: ## [GHCR] Convert architecture-example.pptx and extract images
-	@echo "Converting architecture-example.pptx with image extraction (using GHCR image)..."
-	$(DOCKER_RUN_GHCR) convert /input/architecture-example.pptx /output -f markdown --export-images
-
-ghcr-run-all: ghcr-run-html ghcr-run-md ghcr-run-pdf ghcr-run-pptx ghcr-run-image ## [GHCR] Run all example conversions
-
-ghcr-quick-start: setup ghcr-pull ghcr-run-batch show-output ## Pull from GHCR and run batch conversion
-	@echo "\n✓ GHCR quick start complete! Check output/ for converted files."
