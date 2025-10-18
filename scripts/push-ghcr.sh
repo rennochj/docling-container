@@ -22,22 +22,32 @@ IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
 # Check if logged in to GHCR
 echo "🔐 Checking GHCR authentication..."
-if ! docker login ghcr.io --password-stdin <<< "$GITHUB_TOKEN" 2>/dev/null; then
-    if ! echo "" | docker login ghcr.io -u rennochj --password-stdin 2>/dev/null; then
-        echo "⚠️  Not logged in to GHCR. Please authenticate:"
-        echo ""
-        echo "  1. Create a GitHub Personal Access Token with 'write:packages' scope"
-        echo "     https://github.com/settings/tokens/new?scopes=write:packages"
-        echo ""
-        echo "  2. Login to GHCR:"
-        echo "     export GITHUB_TOKEN=your_token_here"
-        echo "     echo \$GITHUB_TOKEN | docker login ghcr.io -u rennochj --password-stdin"
-        echo ""
+
+# Check if already authenticated by looking at Docker config
+if grep -q "ghcr.io" ~/.docker/config.json 2>/dev/null; then
+    echo "✓ Already authenticated to GHCR"
+elif [ -n "$GITHUB_TOKEN" ]; then
+    echo "Authenticating with GITHUB_TOKEN..."
+    if echo "$GITHUB_TOKEN" | docker login ghcr.io -u rennochj --password-stdin 2>/dev/null; then
+        echo "✓ Authenticated to GHCR"
+    else
+        echo "❌ Failed to authenticate with GITHUB_TOKEN"
         exit 1
     fi
+else
+    echo "⚠️  Not logged in to GHCR and GITHUB_TOKEN not set."
+    echo ""
+    echo "Please authenticate using one of these methods:"
+    echo ""
+    echo "  1. Login directly:"
+    echo "     docker login ghcr.io -u rennochj"
+    echo ""
+    echo "  2. Or use a GitHub Personal Access Token:"
+    echo "     export GITHUB_TOKEN=your_token_here"
+    echo "     echo \$GITHUB_TOKEN | docker login ghcr.io -u rennochj --password-stdin"
+    echo ""
+    exit 1
 fi
-
-echo "✓ Authenticated to GHCR"
 
 # Ensure builder exists
 if ! docker buildx inspect "$BUILDER_NAME" &> /dev/null; then
