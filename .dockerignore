@@ -36,6 +36,7 @@ tests/
 # Project specific directories
 output/
 input/
+docling/
 
 # Project files
 .python-version
