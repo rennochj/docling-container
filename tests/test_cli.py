@@ -16,7 +16,7 @@ class TestCLI:
         """Test CLI help command."""
         result = self.runner.invoke(cli, ['--help'])
         assert result.exit_code == 0
-        assert 'Docling Container' in result.output
+        assert 'Docling Forge' in result.output
 
     def test_cli_version(self):
         """Test CLI version command."""
