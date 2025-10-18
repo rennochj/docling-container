@@ -1,5 +1,9 @@
 # Docling Container
 
+[![GitHub release](https://img.shields.io/github/v/release/rennochj/docling-container)](https://github.com/rennochj/docling-container/releases)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/rennochj/docling-container/pkgs/container/docling-container)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Docker container for [Docling](https://docling-project.github.io/docling/), a powerful document conversion tool that converts various document formats to markdown, HTML, JSON, text, and more.
 
 ## Features
@@ -34,7 +38,19 @@ A Docker container for [Docling](https://docling-project.github.io/docling/), a 
 - Docker installed on your system
 - Input documents to convert
 
-### Building the Container
+### Using Pre-built Image (Recommended)
+
+Pull the latest image from GitHub Container Registry:
+
+```bash
+# Pull latest version
+docker pull ghcr.io/rennochj/docling-container:latest
+
+# Or pull a specific version
+docker pull ghcr.io/rennochj/docling-container:0.1.0
+```
+
+### Building from Source
 
 ```bash
 # Clone the repository
@@ -43,25 +59,28 @@ cd docling-container
 
 # Build the Docker image
 docker build -t docling-container .
-```
 
-### Using Pre-built Image (Coming Soon)
-
-```bash
-# Pull from Docker Hub
-docker pull rennochj/docling-container:latest
+# Or build for multiple platforms
+make build-multiplatform
 ```
 
 ## Quick Start
 
-The fastest way to get started:
+The fastest way to get started with the pre-built image:
 
 ```bash
-# Build and run batch conversion
-make quick-start
+# Pull the image
+docker pull ghcr.io/rennochj/docling-container:latest
+
+# Convert a PDF
+docker run --rm \
+  -v $(pwd)/input:/input \
+  -v $(pwd)/output:/output \
+  ghcr.io/rennochj/docling-container:latest \
+  convert document.pdf
 ```
 
-Or using Make targets:
+Or if you're building from source, use Make targets:
 
 ```bash
 # Build the image
@@ -465,7 +484,41 @@ Contributions are welcome! Please follow these guidelines:
 2. Create a feature branch
 3. Make your changes with tests
 4. Ensure tests pass: `uv run pytest`
-5. Submit a pull request
+5. Use conventional commits (e.g., `feat:`, `fix:`, `docs:`)
+6. Submit a pull request
+
+### Release Process (Maintainers)
+
+This project uses semantic versioning and automated releases:
+
+```bash
+# Prerequisites
+pip install bump2version
+brew install git-cliff gh
+gh auth login
+
+# Create a release (patch, minor, or major)
+make release-minor
+
+# This will:
+# - Run tests
+# - Bump version
+# - Generate changelog
+# - Build multi-platform images
+# - Push to GHCR
+# - Create GitHub release
+```
+
+**Release Commands:**
+- `make release-patch` - Bug fixes (0.1.0 → 0.1.1)
+- `make release-minor` - New features (0.1.0 → 0.2.0)
+- `make release-major` - Breaking changes (0.1.0 → 1.0.0)
+
+**Individual Steps:**
+- `make show-version` - Show current version
+- `make changelog` - Generate changelog
+- `make build-multiplatform` - Build for amd64 + arm64
+- `make push-ghcr` - Push to GitHub Container Registry
 
 ## License
 

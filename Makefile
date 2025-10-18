@@ -13,7 +13,9 @@ DOCKER_RUN := docker run --rm -v $(INPUT_DIR):/input -v $(OUTPUT_DIR):/output $(
 .DEFAULT_GOAL := help
 
 # PHONY targets (not files)
-.PHONY: help build clean clean-output clean-images setup run-html run-md run-batch run-all shell test
+.PHONY: help build clean clean-output clean-images setup run-html run-md run-batch run-all shell test \
+        version show-version release-patch release-minor release-major \
+        build-multiplatform push-ghcr setup-buildx changelog
 
 ##@ General
 
@@ -151,6 +153,35 @@ version: ## Show Docker and tool versions
 	@docker run --rm $(FULL_IMAGE) python --version 2>/dev/null || echo "Image not built yet"
 	@echo "\nLocal uv version:"
 	@uv --version 2>/dev/null || echo "uv not installed locally"
+
+##@ Versioning & Release
+
+show-version: ## Show current version
+	@echo "Current version: $$(cat VERSION)"
+	@echo "Git tags:"
+	@git tag -l | tail -5 || echo "  No tags yet"
+
+changelog: ## Generate CHANGELOG.md from conventional commits
+	@echo "Generating changelog..."
+	@git-cliff --output CHANGELOG.md || echo "⚠️  git-cliff not installed. Install with: brew install git-cliff"
+
+setup-buildx: ## Setup Docker Buildx for multi-platform builds
+	@./scripts/setup-buildx.sh
+
+build-multiplatform: ## Build multi-platform images (amd64 + arm64)
+	@./scripts/build-multiplatform.sh
+
+push-ghcr: ## Push images to GitHub Container Registry
+	@./scripts/push-ghcr.sh
+
+release-patch: ## Create a patch release (0.1.0 -> 0.1.1)
+	@./scripts/release.sh patch
+
+release-minor: ## Create a minor release (0.1.0 -> 0.2.0)
+	@./scripts/release.sh minor
+
+release-major: ## Create a major release (0.1.0 -> 1.0.0)
+	@./scripts/release.sh major
 
 ##@ Quick Start
 
