@@ -202,8 +202,12 @@ commit_and_tag() {
         git add CHANGELOG.md
     fi
 
-    # Commit
-    git commit -m "chore(release): prepare for v${VERSION}
+    # Check if there are changes to commit
+    if git diff-index --quiet HEAD --; then
+        print_warning "No changes to commit (already committed)"
+    else
+        # Commit
+        git commit -m "chore(release): prepare for v${VERSION}
 
 - Bump version to ${VERSION}
 - Update changelog
@@ -212,27 +216,47 @@ commit_and_tag() {
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-    print_success "Changes committed"
+        print_success "Changes committed"
+    fi
 
-    # Create git tag
-    git tag -a "v${VERSION}" -m "Release v${VERSION}"
-
-    print_success "Tag created: v${VERSION}"
+    # Check if tag already exists
+    if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+        print_warning "Tag v${VERSION} already exists, skipping tag creation"
+    else
+        # Create git tag
+        git tag -a "v${VERSION}" -m "Release v${VERSION}"
+        print_success "Tag created: v${VERSION}"
+    fi
 }
 
 # Push to GitHub
 push_to_github() {
     print_header "Pushing to GitHub"
 
-    git push origin $(git branch --show-current)
-    git push origin "v${VERSION}"
+    # Push commits
+    if git push origin $(git branch --show-current); then
+        print_success "Commits pushed to GitHub"
+    else
+        print_warning "No new commits to push (already up to date)"
+    fi
 
-    print_success "Pushed to GitHub"
+    # Push tag
+    if git push origin "v${VERSION}" 2>&1 | grep -q "up-to-date"; then
+        print_warning "Tag v${VERSION} already pushed"
+    else
+        print_success "Tag v${VERSION} pushed to GitHub"
+    fi
 }
 
 # Create GitHub release
 create_github_release() {
     print_header "Creating GitHub Release"
+
+    # Check if release already exists
+    if gh release view "v${VERSION}" &> /dev/null; then
+        print_warning "GitHub release v${VERSION} already exists, skipping"
+        return
+    fi
 
     # Extract changelog for this version
     local release_notes=""
