@@ -2,8 +2,10 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import mimetypes
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import os
 
 from docling.document_converter import DocumentConverter as DoclingConverter
 from docling.datamodel.base_models import InputFormat
@@ -46,7 +48,10 @@ class DocumentConverter:
         export_images: bool = False,
         images_scale: float = 2.0,
         export_page_images: bool = False,
-        logger: Optional[logging.Logger] = None
+        logger: Optional[logging.Logger] = None,
+        max_workers: Optional[int] = None,
+        do_ocr: bool = True,
+        do_table_detection: bool = True
     ):
         """Initialize the document converter.
 
@@ -57,6 +62,9 @@ class DocumentConverter:
             images_scale: Resolution scale for images (1.0 = 72 DPI, 2.0 = 144 DPI)
             export_page_images: Whether to extract full page images (default: False)
             logger: Optional logger instance
+            max_workers: Maximum number of worker threads for batch processing (default: CPU count)
+            do_ocr: Enable OCR for scanned documents (default: True)
+            do_table_detection: Enable table structure detection (default: True)
         """
         self.output_format = output_format.lower()
         self.preserve_structure = preserve_structure
@@ -64,11 +72,20 @@ class DocumentConverter:
         self.images_scale = images_scale
         self.export_page_images = export_page_images
         self.logger = logger or logging.getLogger(__name__)
+        self.max_workers = max_workers or os.cpu_count() or 4
+        self.do_ocr = do_ocr
+        self.do_table_detection = do_table_detection
 
         # Initialize Docling converter with optimized settings
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.do_ocr = True
-        pipeline_options.do_table_structure = True
+        pipeline_options.do_ocr = do_ocr
+        pipeline_options.do_table_structure = do_table_detection
+
+        # Log performance settings
+        if not do_ocr:
+            self.logger.info("OCR disabled for faster processing of digital-only documents")
+        if not do_table_detection:
+            self.logger.info("Table detection disabled for faster processing")
 
         # Enable image generation if export_images is True
         if export_images:
@@ -82,7 +99,25 @@ class DocumentConverter:
             }
         )
 
+        # Suppress RapidOCR logging after DoclingConverter initialization
+        # RapidOCR adds its own handlers during initialization, so we need to disable them
+        self._suppress_rapidocr_logging()
+
         self.conversion_logger = ConversionLogger(self.logger)
+
+    def _suppress_rapidocr_logging(self):
+        """Suppress RapidOCR logging output.
+
+        RapidOCR adds its own StreamHandler during initialization.
+        This method removes those handlers to prevent verbose log output.
+        """
+        rapidocr_loggers = ['RapidOCR', 'rapidocr', 'rapidocr_onnxruntime',
+                           'rapidocr_openvino', 'rapidocr_paddle']
+        for logger_name in rapidocr_loggers:
+            rapid_logger = logging.getLogger(logger_name)
+            rapid_logger.handlers.clear()
+            rapid_logger.setLevel(logging.CRITICAL)
+            rapid_logger.propagate = False
 
     def _detect_format(self, file_path: Path) -> Optional[InputFormat]:
         """Detect the input format from file extension.
@@ -315,6 +350,25 @@ class DocumentConverter:
                 import json
                 json.dump(content, f, indent=2, ensure_ascii=False)
 
+    def _convert_single_file_worker(
+        self,
+        file_info: Tuple[Path, Path]
+    ) -> Tuple[Optional[Path], Optional[Exception]]:
+        """Worker function to convert a single file in parallel batch processing.
+
+        Args:
+            file_info: Tuple of (input_path, output_dir)
+
+        Returns:
+            Tuple of (output_path or None, exception or None)
+        """
+        file_path, file_output_dir = file_info
+        try:
+            output_path = self.convert_file(file_path, file_output_dir)
+            return (output_path, None)
+        except Exception as e:
+            return (None, e)
+
     def convert_batch(
         self,
         input_dir: Path,
@@ -323,7 +377,7 @@ class DocumentConverter:
         fail_fast: bool = False,
         patterns: Optional[List[str]] = None
     ) -> List[Path]:
-        """Convert multiple files from a directory.
+        """Convert multiple files from a directory using parallel processing.
 
         Args:
             input_dir: Directory containing input files
@@ -341,6 +395,7 @@ class DocumentConverter:
         self.logger.info(f"Starting batch conversion from {input_dir}")
         self.logger.info(f"Output directory: {output_dir}")
         self.logger.info(f"Recursive: {recursive}, Fail-fast: {fail_fast}")
+        self.logger.info(f"Using {self.max_workers} worker threads")
         if patterns:
             self.logger.info(f"File patterns: {', '.join(patterns)}")
 
@@ -367,27 +422,60 @@ class DocumentConverter:
 
         self.logger.info(f"Found {len(supported_files)} supported files")
 
-        # Convert each file
-        converted_files = []
+        # Prepare file info for parallel processing
+        file_infos = []
         for file_path in supported_files:
-            try:
-                # Create subdirectory structure if recursive
-                if recursive:
-                    relative_path = file_path.relative_to(input_dir)
-                    file_output_dir = output_dir / relative_path.parent
-                else:
-                    file_output_dir = output_dir
+            # Create subdirectory structure if recursive
+            if recursive:
+                relative_path = file_path.relative_to(input_dir)
+                file_output_dir = output_dir / relative_path.parent
+            else:
+                file_output_dir = output_dir
+            file_infos.append((file_path, file_output_dir))
 
-                output_path = self.convert_file(file_path, file_output_dir)
-                converted_files.append(output_path)
+        # Process files in parallel
+        converted_files = []
+        first_error = None
 
-            except Exception as e:
-                if fail_fast:
-                    self.conversion_logger.log_summary()
-                    raise RuntimeError(
-                        f"Batch conversion stopped due to error: {e}"
-                    ) from e
-                # Otherwise continue processing remaining files
+        # Use ThreadPoolExecutor for parallel processing
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Submit all files for processing
+            futures = {
+                executor.submit(self._convert_single_file_worker, file_info): file_info[0]
+                for file_info in file_infos
+            }
+
+            # Process completed futures as they finish
+            for future in as_completed(futures):
+                file_path = futures[future]
+
+                try:
+                    output_path, error = future.result()
+
+                    if error:
+                        if fail_fast:
+                            # Cancel remaining futures
+                            for f in futures:
+                                f.cancel()
+                            self.conversion_logger.log_summary()
+                            raise RuntimeError(
+                                f"Batch conversion stopped due to error: {error}"
+                            ) from error
+                        # Log error but continue
+                        self.logger.error(f"Failed to convert {file_path}: {error}")
+                    elif output_path:
+                        converted_files.append(output_path)
+
+                except Exception as e:
+                    # Unexpected error from the future itself
+                    if fail_fast:
+                        for f in futures:
+                            f.cancel()
+                        self.conversion_logger.log_summary()
+                        raise RuntimeError(
+                            f"Batch conversion stopped due to unexpected error: {e}"
+                        ) from e
+                    self.logger.error(f"Unexpected error processing {file_path}: {e}")
 
         # Log summary
         self.conversion_logger.log_summary()

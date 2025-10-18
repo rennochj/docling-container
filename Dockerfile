@@ -14,19 +14,17 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files
-COPY pyproject.toml ./
+# Copy dependency files (including lock file for reproducible builds)
+COPY pyproject.toml uv.lock ./
 
-# Create virtual environment and install dependencies
-RUN uv venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN uv pip install --no-cache -r pyproject.toml
-
-# Copy application code
+# Copy application code (needed for package installation)
 COPY docling_container/ ./docling_container/
 
-# Install the package
-RUN uv pip install --no-cache -e .
+# Install dependencies using uv sync
+# This creates a .venv directory and uses the lock file for exact dependency versions
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+RUN uv sync --frozen --no-dev
 
 
 # Stage 2: Runtime image
@@ -43,13 +41,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/.venv /app/.venv
 
 # Copy application code
 COPY --from=builder /app/docling_container /app/docling_container
 
 # Set environment variables
-ENV PATH="/opt/venv/bin:$PATH"
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 
 # Create directories for input and output
@@ -57,6 +56,13 @@ RUN mkdir -p /input /output
 
 # Set working directory
 WORKDIR /app
+
+# Copy model prefetch script
+COPY scripts/prefetch-models.py /tmp/prefetch-models.py
+
+# Pre-download RapidOCR models to avoid runtime downloads
+# This improves first-run performance and ensures models are available offline
+RUN /app/.venv/bin/python /tmp/prefetch-models.py && rm /tmp/prefetch-models.py
 
 # Default volumes
 VOLUME ["/input", "/output"]

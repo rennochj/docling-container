@@ -7,7 +7,6 @@ from typing import Optional
 import re
 from importlib.metadata import version, PackageNotFoundError
 
-from .converter import DocumentConverter
 from .logger import setup_logging
 from .config import Config
 
@@ -16,6 +15,41 @@ try:
     __version__ = version("docling-container")
 except PackageNotFoundError:
     __version__ = "unknown"
+
+
+def _suppress_rapidocr_logging():
+    """Suppress RapidOCR logging globally.
+
+    Must be called before importing DocumentConverter to prevent
+    RapidOCR from showing verbose log messages.
+    """
+    from .logger import RapidOCRFilter
+
+    rapidocr_loggers = ['RapidOCR', 'rapidocr', 'rapidocr_onnxruntime',
+                       'rapidocr_openvino', 'rapidocr_paddle']
+
+    rapidocr_filter = RapidOCRFilter()
+
+    for logger_name in rapidocr_loggers:
+        rapid_logger = logging.getLogger(logger_name)
+        # Clear handlers
+        rapid_logger.handlers.clear()
+        # Set to CRITICAL level
+        rapid_logger.setLevel(logging.CRITICAL)
+        # Disable propagation
+        rapid_logger.propagate = False
+        # Add filter to block any messages that get through
+        rapid_logger.addFilter(rapidocr_filter)
+
+    # Also add filter to any existing StreamHandlers on stderr
+    for handler in logging.root.handlers:
+        if isinstance(handler, logging.StreamHandler):
+            if not any(isinstance(f, RapidOCRFilter) for f in handler.filters):
+                handler.addFilter(rapidocr_filter)
+
+
+# Note: DocumentConverter will be imported lazily in the convert() function
+# This significantly improves startup time for commands like --help and formats
 
 
 # Supported formats (must match converter.py EXTENSION_TO_FORMAT)
@@ -126,6 +160,22 @@ def cli(ctx):
     multiple=True,
     help='Glob pattern(s) to filter files in batch mode (e.g., "*.pdf", "report_*.docx"). Can be specified multiple times.'
 )
+@click.option(
+    '--workers',
+    type=int,
+    default=None,
+    help='Number of parallel worker threads for batch processing. Default: number of CPU cores.'
+)
+@click.option(
+    '--ocr/--no-ocr',
+    default=True,
+    help='Enable OCR for scanned documents and images. Disable for faster processing of digital-only docs.'
+)
+@click.option(
+    '--table-detection/--no-table-detection',
+    default=True,
+    help='Enable table structure detection. Disable for faster processing when tables are not needed.'
+)
 def convert(
     input_path: str,
     output_dir: Path,
@@ -140,7 +190,10 @@ def convert(
     export_images: bool,
     images_scale: float,
     export_page_images: bool,
-    pattern: tuple
+    pattern: tuple,
+    workers: Optional[int],
+    ocr: bool,
+    table_detection: bool
 ):
     """Convert document(s) from INPUT_PATH to OUTPUT_DIR.
 
@@ -176,6 +229,16 @@ def convert(
     # Setup logging
     logger = setup_logging(log_level, log_file)
 
+    # Re-enable RapidOCR logging if in DEBUG mode
+    # (it's suppressed by default at module level)
+    if log_level == "DEBUG":
+        for logger_name in ['RapidOCR', 'rapidocr']:
+            rapid_logger = logging.getLogger(logger_name)
+            rapid_logger.setLevel(logging.DEBUG)
+    else:
+        # Ensure suppression in case handlers were re-added
+        _suppress_rapidocr_logging()
+
     # Log version information
     logger.info(f"docling-container version {__version__}")
 
@@ -185,6 +248,14 @@ def convert(
         if config:
             logger.info(f"Loaded configuration from {config}")
 
+        # Lazy import DocumentConverter only when actually needed for conversion
+        # This dramatically improves startup time for --help and formats commands
+        from .converter import DocumentConverter
+
+        # Suppress RapidOCR logging after import (unless in DEBUG mode)
+        if log_level != "DEBUG":
+            _suppress_rapidocr_logging()
+
         # Initialize converter
         converter = DocumentConverter(
             output_format=output_format,
@@ -192,7 +263,10 @@ def convert(
             export_images=export_images,
             images_scale=images_scale,
             export_page_images=export_page_images,
-            logger=logger
+            logger=logger,
+            max_workers=workers,
+            do_ocr=ocr,
+            do_table_detection=table_detection
         )
 
         # Check if input is a URL

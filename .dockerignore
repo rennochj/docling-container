@@ -33,6 +33,10 @@ docs/
 examples/
 tests/
 
+# Project specific directories
+output/
+input/
+
 # Project files
 .python-version
 .DS_Store
@@ -42,3 +46,15 @@ tests/
 dist/
 build/
 *.egg-info/
+.eggs/
+
+# Cache directories
+.cache/
+*.cache
+
+# Development
+.claude/
+Makefile
+
+# UV lock file (we'll copy it explicitly)
+# uv.lock is needed, so don't ignore it
