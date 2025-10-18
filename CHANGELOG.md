@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ⚡ Performance
+- Implement comprehensive performance optimizations
+
+
+### 🔧 Miscellaneous
+- Add Claude Code configuration and custom commands
+
+## [0.3.4] - 2025-10-18
+
 ### 🚀 Features
 - Add version logging and shorter command alias
 
