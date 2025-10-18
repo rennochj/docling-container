@@ -1,6 +1,6 @@
 [project]
 name = "docling-forge"
-version = "0.3.6"
+version = "0.4.0"
 description = "Powerful Docker-based document conversion tool built with Docling"
 requires-python = ">=3.13"
 dependencies = [

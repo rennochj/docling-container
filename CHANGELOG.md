@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🐛 Bug Fixes
+- Update all remaining references to docling-forge
+
+
+### 🚜 Refactor
+- Rename project from docling-container to docling-forge
+
+
+### 🧪 Testing
+- Update test to expect new project name
+
+
+### 🔧 Miscellaneous
+- Update uv.lock for version 0.3.5
+
+## [0.3.6] - 2025-10-18
+
 ### 🚀 Features
 - Add configurable output subdirectory for organized file storage
 
