@@ -4,12 +4,12 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Colors for output (using ANSI-C quoting for proper escape sequence interpretation)
+RED=$'\033[0;31m'
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+NC=$'\033[0m' # No Color
 
 # Configuration
 GITHUB_REPO="rennochj/docling-container"
@@ -18,26 +18,26 @@ IMAGE_NAME="ghcr.io/${GITHUB_REPO}"
 # Helper functions
 print_header() {
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}  $1${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    printf "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+    printf "${BLUE}  %s${NC}\n" "$1"
+    printf "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
     echo ""
 }
 
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    printf "${GREEN}✓${NC} %s\n" "$1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    printf "${RED}✗${NC} %s\n" "$1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    printf "${YELLOW}⚠${NC} %s\n" "$1"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
+    printf "${BLUE}ℹ${NC} %s\n" "$1"
 }
 
 # Check prerequisites
@@ -282,9 +282,9 @@ create_github_release() {
 display_summary() {
     print_header "Release Summary"
 
-    echo -e "${GREEN}🎉 Release v${VERSION} completed successfully!${NC}"
+    printf "${GREEN}🎉 Release v${VERSION} completed successfully!${NC}\n"
     echo ""
-    echo "Released version: ${GREEN}v${VERSION}${NC}"
+    printf "Released version: ${GREEN}v${VERSION}${NC}\n"
     echo "GitHub Release:   https://github.com/${GITHUB_REPO}/releases/tag/v${VERSION}"
     echo ""
     echo "Container images published to GHCR:"
@@ -292,8 +292,8 @@ display_summary() {
     echo "  🔗 ${IMAGE_NAME}:latest"
     echo ""
     echo "Users can pull with:"
-    echo "  ${BLUE}docker pull ${IMAGE_NAME}:${VERSION}${NC}"
-    echo "  ${BLUE}docker pull ${IMAGE_NAME}:latest${NC}"
+    printf "  ${BLUE}docker pull ${IMAGE_NAME}:${VERSION}${NC}\n"
+    printf "  ${BLUE}docker pull ${IMAGE_NAME}:latest${NC}\n"
     echo ""
 }
 
